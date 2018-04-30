@@ -3,6 +3,7 @@ package flight;
 import java.util.Collections;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,7 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public class main {
     
-    public WebDriver driver = new ChromeDriver();
+    public static WebDriver driver;
     public static void main(String[] args)throws InterruptedException{
         String departDate = "26-06-2018";
         String returnDate = "06-07-2018";
@@ -40,7 +41,7 @@ public class main {
 //            doc = Jsoup.connect("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
 //                    + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD").get();
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/Desktop/flights/chromedriver.exe");
-        WebDriver driver = new ChromeDriver(options);
+        driver = new ChromeDriver(options);
         String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
                 + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
         
@@ -55,6 +56,7 @@ public class main {
         
         // Should return top 2 results and the "best" based on Momondo's algorithms
         generateResults();
+        
         
     }
     public static void print(String string){
@@ -75,8 +77,21 @@ public class main {
      * This method will generate a Trip instance which contains the dates of the travel and best options
      */
     public static void generateResults(){
+        //First, need to create a flight instance for departure and one for return (Cheapest flight)
+        Flight departureFlight = new Flight();
+        Flight returnFlight = new Flight();
+        String path;
+        insertStats(departureFlight, returnFlight, path);
+        
         
     }
+    public static void insertStats(Flight departureFlight, Flight returnFlight, String path){
+        
+        WebElement airlineElement = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"));
+        
+        
+    }
+    
 
     
     
