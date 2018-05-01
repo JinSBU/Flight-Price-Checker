@@ -6,6 +6,7 @@ package flight;
  */
 public class Flight {
     String airline;
+    String departureAirportCode, arrivalAirportCode;
     String departureAirport, arrivalAirport;
     String departureTime, arrivalTime;
     boolean layover;

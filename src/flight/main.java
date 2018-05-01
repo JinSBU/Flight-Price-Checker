@@ -80,18 +80,35 @@ public class main {
         //First, need to create a flight instance for departure and one for return (Cheapest flight)
         Flight departureFlight = new Flight();
         Flight returnFlight = new Flight();
-        String path;
-        insertStats(departureFlight, returnFlight, path);
-        
-        
+        String cheapestPath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
+
+        insertStats(departureFlight, returnFlight, cheapestPath);
+
+//        /html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]
     }
-    public static void insertStats(Flight departureFlight, Flight returnFlight, String path){
-        
-        WebElement airlineElement = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"));
-        
-        
+    public static void insertStats(Flight departureFlight, Flight returnFlight, String path) {
+        String spanIndex = "1";
+        String departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
+        departureFlight.airline = driver.findElement(By.xpath(path.substring(0, path.length() - 6) + "/div[1]")).getAttribute("innerHTML").replace("<span>", " ").replace("</span>", " ");
+        departureFlight.departureAirportCode = (driver.findElement(By.xpath(departAirportInfoPath))).getAttribute("innerHTML");
+
+        spanIndex = "2";
+        departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
+        String departureTime = driver.findElement(By.xpath(departAirportInfoPath + "/span[1]")).getAttribute("innerHTML") + " " + driver.findElement(By.xpath(departAirportInfoPath + "/span[2]")).getAttribute("innerHTML");
+        // The line above combines the time ex: 5:30 with "am/pm"
+        departureFlight.departureTime = departureTime;
+
+        spanIndex = "3";
+        departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";            //setting the new path so we can get departureAirport
+        departureFlight.departureAirport = driver.findElement(By.xpath(departAirportInfoPath)).getAttribute("innerHTML");
+
+
+
+
+
+
     }
-    
+///html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]/li[1]/div[1]/div[1]/div[2]/span[2]/span[1]
 
     
     
