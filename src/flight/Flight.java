@@ -9,7 +9,11 @@ public class Flight {
     String departureAirportCode, arrivalAirportCode;
     String departureAirport, arrivalAirport;
     String departureTime, arrivalTime;
-    boolean layover;
+    boolean layover = false;
     String totalTravelTime;
-    
+
+    public void printStats(){
+        System.out.println(airline + " " + departureAirportCode + " " + departureAirport + " " + departureTime +
+                "\n" + arrivalAirportCode + " " + arrivalAirportCode + " " + arrivalAirport + " " + arrivalTime + "\n" + totalTravelTime);
+    }
 }

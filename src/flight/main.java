@@ -82,35 +82,58 @@ public class main {
         Flight returnFlight = new Flight();
         String cheapestPath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
 
-        insertStats(departureFlight, returnFlight, cheapestPath);
+        insertStats(departureFlight, "1", cheapestPath);
+        insertStats(returnFlight, "2", cheapestPath);
+        String pricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
+        String price = driver.findElement(By.xpath(pricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
+        price = price.substring(0, price.indexOf("D") + 1);
+        Trip cheapestTrip = new Trip(departureFlight, returnFlight, price);
 
-//        /html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]
+        //Need to work on bestPriceTrip now
+
+
     }
-    public static void insertStats(Flight departureFlight, Flight returnFlight, String path) {
+    public static void insertStats(Flight departureFlight, String listIndex, String path) {
         String spanIndex = "1";
-        String departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
+        String departAirportInfoPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
         departureFlight.airline = driver.findElement(By.xpath(path.substring(0, path.length() - 6) + "/div[1]")).getAttribute("innerHTML").replace("<span>", " ").replace("</span>", " ");
         departureFlight.departureAirportCode = (driver.findElement(By.xpath(departAirportInfoPath))).getAttribute("innerHTML");
 
         spanIndex = "2";
-        departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
-        String departureTime = driver.findElement(By.xpath(departAirportInfoPath + "/span[1]")).getAttribute("innerHTML") + " " + driver.findElement(By.xpath(departAirportInfoPath + "/span[2]")).getAttribute("innerHTML");
+        departAirportInfoPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
+        String departingTime = driver.findElement(By.xpath(departAirportInfoPath + "/span[1]")).getAttribute("innerHTML") + " " + driver.findElement(By.xpath(departAirportInfoPath + "/span[2]")).getAttribute("innerHTML");
         // The line above combines the time ex: 5:30 with "am/pm"
-        departureFlight.departureTime = departureTime;
+        departureFlight.departureTime = departingTime;
 
         spanIndex = "3";
-        departAirportInfoPath = path + "/li[1]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";            //setting the new path so we can get departureAirport
+        departAirportInfoPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";            //setting the new path so we can get departureAirport
         departureFlight.departureAirport = driver.findElement(By.xpath(departAirportInfoPath)).getAttribute("innerHTML");
 
+        String layoverPAth = path + "/li[" + listIndex + "]/div[1]/div[1]/div[3]/div[3]";
+        WebElement layoverElement = driver.findElement(By.xpath(layoverPAth));
+        if(!layoverElement.getAttribute("innerHTML").toLowerCase().contains("nonstop")){
+            departureFlight.layover = true;
+        }
+
+        String travelTimePath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[3]/div[1]";
+        departureFlight.totalTravelTime = driver.findElement(By.xpath(travelTimePath)).getAttribute("innerHTML");
+
+        //Below will fill in info about arrival Airport
+        String arrivalTimePath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[4]/span[1]/span[1]";
+        String arrivalPartOfDayPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[4]/span[1]/span[2]";
+        String arrivalTime = driver.findElement(By.xpath(arrivalTimePath)).getAttribute("innerHTML") + " " + driver.findElement(By.xpath(arrivalPartOfDayPath)).getAttribute("innerHTML");
+        departureFlight.arrivalTime = arrivalTime;
 
 
+        String arrivalAirportCodePath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[4]/span[2]";
+        departureFlight.arrivalAirportCode = driver.findElement(By.xpath(arrivalAirportCodePath)).getAttribute("innerHTML");
 
+        String arrivalAirportPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[4]/span[3]";
+        departureFlight.arrivalAirport = driver.findElement(By.xpath(arrivalAirportPath)).getAttribute("innerHTML");
 
 
     }
-///html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]/li[1]/div[1]/div[1]/div[2]/span[2]/span[1]
 
-    
     
     
 }
