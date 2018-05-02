@@ -5,7 +5,7 @@ Goal: To create a software program that will allow user to find the cheapest fli
       they wish to travel and a time period for the travel. The program will compare all available options with those parameters and return
       the cheapest flight option and best valued option. 
 Roadmap for this project:
-  Completed: (As of 5/2/2018) \n
+  Completed: (As of 5/2/2018)
       - Decide on a website to get best prices for flights (Momondo since Google Flights API is shutting down).
       - Create general outline for how this project will look.
       - Return cheapest flight given period of travel and airports.
