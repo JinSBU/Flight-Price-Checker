@@ -54,7 +54,6 @@ public class main {
             can have GUI and show lowest price in a month. THIS IS WHAT WILL BE WORKED ON
         */
         
-        // Should return top 2 results and the "best" based on Momondo's algorithms
         generateResults();
         
         
@@ -74,7 +73,7 @@ public class main {
     }
     
     /**
-     * This method will generate a Trip instance which contains the dates of the travel and best options
+     * This method will generate a Trip instance for the cheapest value flight and best valued flight
      */
     public static void generateResults(){
         //First, need to create a flight instance for departure and one for return (Cheapest flight)
@@ -89,7 +88,60 @@ public class main {
         price = price.substring(0, price.indexOf("D") + 1);
         Trip cheapestTrip = new Trip(departureFlight, returnFlight, price);
 
-        //Need to work on bestPriceTrip now
+        String bestPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[4]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/a[1]/div[1]/div[2]/span[1]";
+
+        String bestValuePrice = driver.findElement(By.xpath(bestPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
+        bestValuePrice = bestValuePrice.substring(0, bestValuePrice.indexOf("D") + 1);
+//        print("Best price: " + bestValuePrice);
+
+        Flight bestValueDepartureFlight = new Flight();
+        Flight bestValueReturnFlight = new Flight();
+        Trip bestValueTrip;
+        if(bestValuePrice.equals(price)){
+            bestValueTrip = cheapestTrip;
+        }
+        else{
+            String index = getBestValuePriceIndex(bestValuePrice);
+//            print(index);
+            if(index == null){
+                bestValueTrip = cheapestTrip;
+            }
+            else {
+                String bestValuePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + index +
+                        "]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
+                insertStats(bestValueDepartureFlight, "1", bestValuePath);
+                insertStats(bestValueReturnFlight, "2", bestValuePath);
+                bestValueTrip = new Trip(bestValueDepartureFlight, bestValueReturnFlight, bestValuePrice);
+            }
+        }
+
+        //Up to here. Just finished putting values into bestValueTrip
+
+
+
+
+
+
+
+
+    }
+    public static String getBestValuePriceIndex(String price){
+        for(int i = 2; i < 19; i++){    //This loop only goes up to 18 because Momondo only displaces 18 results
+            try {
+                String optionPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + Integer.toString(i) +
+                        "]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
+                String optionPrice = driver.findElement(By.xpath(optionPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
+
+                optionPrice = optionPrice.substring(0, optionPrice.indexOf("D") + 1).replace("\n", "");
+                if (optionPrice.equals(price)) {
+                    return Integer.toString(i);
+                }
+            }
+            catch(Exception e){
+                //Only have this here because Momondo skips some indices for some reason
+            }
+        }
+        return null;
 
 
     }
