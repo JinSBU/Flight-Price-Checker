@@ -118,7 +118,6 @@ public class main {
 
         String bestValuePrice = driver.findElement(By.xpath(bestPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
         bestValuePrice = bestValuePrice.substring(0, bestValuePrice.indexOf("D") + 1);
-//        print("Best price: " + bestValuePrice);
 
         Flight bestValueDepartureFlight = new Flight();
         Flight bestValueReturnFlight = new Flight();
