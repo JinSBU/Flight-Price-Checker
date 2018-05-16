@@ -37,5 +37,4 @@ On the way:
       
 Working on:
 
-GUI for inputting parameters (How many days user wishes to travel, Month of travel)
-      
+Finding alternative to headless selenium. As of right now, Momondo does not allow headless browsers to access their site. If I want to open 30 pages on their site, doing so without the option of headless browser would be a mess for users.      
