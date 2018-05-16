@@ -37,4 +37,4 @@ On the way:
       
 Working on:
 
-Finding alternative to headless selenium. As of right now, Momondo does not allow headless browsers to access their site. If I want to open 30 pages on their site, doing so without the option of headless browser would be a mess for users.      
+Found a fix to Momondo detecting headless ChromeDriver. Will work on getting cheapest price within a set amount of dates. (Cheapest 5 day trip between June 01, 2018 to July 01, 2018)  
