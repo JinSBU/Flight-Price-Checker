@@ -1,13 +1,15 @@
 package flight;
 
 import java.util.Collections;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import static java.lang.Thread.sleep;
 
 /**
  *
@@ -23,14 +25,18 @@ public class main {
         String returnDate = "06-07-2018";
         String from = "SEL";
         String to = "NYC";
+        String email = "textacc133@gmail.com";
+        String password = "zxasqw123";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
         
         //These few lines bypasses the checks set by Momondo that disables automated testing
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("useAutomationExtension", false);
-        options.setExperimentalOption("excludeSwitches",Collections.singletonList("enable-automation"));    
-        
+        options.setExperimentalOption("excludeSwitches",Collections.singletonList("enable-automation"));
+
+        options.addArguments("headless");
+        options.addArguments("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
         
         
         
@@ -42,6 +48,9 @@ public class main {
 //                    + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD").get();
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/Desktop/flights/chromedriver.exe");
         driver = new ChromeDriver(options);
+
+        loginGoogle(email,password);
+        print("Logged in");
         String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
                 + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
         
@@ -55,8 +64,25 @@ public class main {
         */
         
         generateResults();
+        driver.close();
         
         
+    }
+    public static void waitForLoad(WebDriver driver) {
+        new WebDriverWait(driver, 30).until((ExpectedCondition<Boolean>) wd ->
+                ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+    }
+    public static void loginGoogle(String email, String password) throws InterruptedException {
+        driver.navigate().to("https://accounts.google.com/ServiceLogin?hl=en&sacu=1");
+        waitForLoad(driver);
+        Thread.sleep(2);
+        print(driver.getCurrentUrl());
+        WebElement emailBox = driver.findElement(By.id("identifierId"));
+        emailBox.sendKeys(email, Keys.ENTER);
+        Thread.sleep(2000);
+        WebElement passwordBox = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/content[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/input[1]"));
+        passwordBox.sendKeys(password, Keys.ENTER);
+//        Thread.sleep(2000);
     }
     public static void print(String string){
         System.out.println(string);
@@ -116,6 +142,7 @@ public class main {
         }
 
         //Up to here. Just finished putting values into bestValueTrip
+        bestValueTrip.departureFlight.printStats();
 
 
 
