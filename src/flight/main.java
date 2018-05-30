@@ -28,25 +28,25 @@ public class main {
     public static void main(String[] args)throws InterruptedException{
 //        String departDate = "26-06-2018";
 //        String returnDate = "06-07-2018";
-        String month = "06";
+        String month = "08";
         String year = "2018";
-        int durationOfTravel = 20;
-        from = "SEL";
-        to = "NYC";
+        int durationOfTravel = 7;
+        from = "NYC";
+        to = "SFO";
         //Input email and password for gmail. Used to bypass captcha/bot check?
         String email = "";
         String password = "";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
-        
+
         //These few lines bypasses the checks set by Momondo that disables automated testing
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("useAutomationExtension", false);
         options.setExperimentalOption("excludeSwitches",Collections.singletonList("enable-automation"));
 
-        options.addArguments("headless");
+//        options.addArguments("headless");
         options.addArguments("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
-        
+
 
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/Desktop/flights/chromedriver.exe");
         driver = new ChromeDriver(options);
@@ -54,13 +54,13 @@ public class main {
         loginGoogle(email,password);
         print("Logged in");
 
-        //Below this point means all the prices have been loaded. 
+        //Below this point means all the prices have been loaded.
         /* Currently have several options to store prices
             can store into a DB and compare everyday to see if prices are steals or have lowered        *this could be a separate project*
             can have GUI and show lowest price in a month. THIS IS WHAT WILL BE WORKED ON
         */
         generateResultsForMonth(month, year, durationOfTravel);
-        
+
         driver.close();
 
 
@@ -79,10 +79,19 @@ public class main {
             String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
                     + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
             driver.navigate().to(url);
+            checkCaptcha();
             waitForJavascript(driver);
             print("Finished loading");
-            generateResults();
+            generateResults(departDate, returnDate, url);
         }
+
+    }
+    public static void checkCaptcha(){
+        if(driver.getPageSource().contains("Please confirm that you are a real momondo user")) {
+            driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/a[1]")).sendKeys(Keys.TAB, Keys.SPACE);
+        }
+        else
+            print("No captcha");
 
     }
     public static void waitForLoad(WebDriver driver) {
@@ -109,16 +118,16 @@ public class main {
      */
     public static void waitForJavascript(WebDriver chrome) throws InterruptedException {
         print("Loading page...");
-        WebDriverWait wait = new WebDriverWait(chrome, 50);
+        WebDriverWait wait = new WebDriverWait(chrome, 70);
         wait.until(ExpectedConditions.textToBePresentInElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]"), "Search complete"));
-        // got it to allow javascript to run first. 
+        // got it to allow javascript to run first.
 
     }
-    
+
     /**
      * This method will generate a Trip instance for the cheapest value flight and best valued flight
      */
-    public static void generateResults(){
+    public static void generateResults(String departDate, String returnDate, String url){
         //First, need to create a flight instance for departure and one for return (Cheapest flight)
         Flight departureFlight = new Flight();
         Flight returnFlight = new Flight();
@@ -129,7 +138,7 @@ public class main {
         String pricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
         String price = driver.findElement(By.xpath(pricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
         price = price.substring(0, price.indexOf("D") + 1);
-        Trip cheapestTrip = new Trip(departureFlight, returnFlight, price);
+        Trip cheapestTrip = new Trip(departureFlight, returnFlight, price, departDate, returnDate, url);
 
         String bestPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[4]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/a[1]/div[1]/div[2]/span[1]";
 
@@ -153,7 +162,7 @@ public class main {
                         "]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
                 insertStats(bestValueDepartureFlight, "1", bestValuePath);
                 insertStats(bestValueReturnFlight, "2", bestValuePath);
-                bestValueTrip = new Trip(bestValueDepartureFlight, bestValueReturnFlight, bestValuePrice);
+                bestValueTrip = new Trip(bestValueDepartureFlight, bestValueReturnFlight, bestValuePrice, departDate, returnDate, url);
             }
         }
 
@@ -223,6 +232,6 @@ public class main {
 
     }
 
-    
-    
+
+
 }
