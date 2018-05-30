@@ -25,8 +25,8 @@ public class main {
         String returnDate = "06-07-2018";
         String from = "SEL";
         String to = "NYC";
-        String email = "textacc133@gmail.com";
-        String password = "zxasqw123";
+        String email = "";
+        String password = "";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
         
