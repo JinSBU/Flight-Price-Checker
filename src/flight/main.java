@@ -1,5 +1,6 @@
 package flight;
 
+import java.time.YearMonth;
 import java.util.Collections;
 
 import org.openqa.selenium.*;
@@ -9,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 
 /**
@@ -18,15 +20,22 @@ import static java.lang.Thread.sleep;
  * At this point, need to open the Momondo on a Chrome before running
  */
 public class main {
-    
-    public static WebDriver driver;
+
+    static WebDriver driver;
+    static String from;
+    static String to;
+    static String includeNearbyAirports;
     public static void main(String[] args)throws InterruptedException{
-        String departDate = "26-06-2018";
-        String returnDate = "06-07-2018";
-        String from = "SEL";
-        String to = "NYC";
-        String email = "textacc133@gmail.com";
-        String password = "zxasqw123";
+//        String departDate = "26-06-2018";
+//        String returnDate = "06-07-2018";
+        String month = "06";
+        String year = "2018";
+        int durationOfTravel = 20;
+        from = "SEL";
+        to = "NYC";
+        //Input email and password for gmail. Used to bypass captcha/bot check?
+        String email = "";
+        String password = "";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
         
@@ -38,35 +47,43 @@ public class main {
         options.addArguments("headless");
         options.addArguments("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
         
-        
-        
-  
-//        try{
-//            //need to find out link for round trip.
-//            //https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:nyc,to:mia,departure:06/21/2018TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3Aeconomy&mode=search&origref=www.expedia.com
-//            doc = Jsoup.connect("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
-//                    + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD").get();
+
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/Desktop/flights/chromedriver.exe");
         driver = new ChromeDriver(options);
 
         loginGoogle(email,password);
         print("Logged in");
-        String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
-                + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
-        
-        driver.navigate().to(url);
-        waitForJavascript(driver);
-        print("Finished loading");
+
         //Below this point means all the prices have been loaded. 
         /* Currently have several options to store prices
             can store into a DB and compare everyday to see if prices are steals or have lowered        *this could be a separate project*
             can have GUI and show lowest price in a month. THIS IS WHAT WILL BE WORKED ON
         */
+        generateResultsForMonth(month, year, durationOfTravel);
         
-        generateResults();
         driver.close();
-        
-        
+
+
+    }
+    public static void generateResultsForMonth(String month, String year, int durationOfTravel) throws InterruptedException {
+
+        YearMonth yearMonthObj = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
+        int numDaysInMonth = yearMonthObj.lengthOfMonth();
+        for(int i = 1; i <= numDaysInMonth - durationOfTravel; i++){
+
+            String startTripDay = String.format("%02d", i);
+            String endTripDay = String.format("%02d", i + durationOfTravel);
+
+            String departDate = startTripDay + "-" + month + "-" + year;         // We always start at the beginning of the month. Format is DD-MM-YYYY
+            String returnDate = endTripDay + "-" + month + "-" + year;
+            String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
+                    + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
+            driver.navigate().to(url);
+            waitForJavascript(driver);
+            print("Finished loading");
+            generateResults();
+        }
+
     }
     public static void waitForLoad(WebDriver driver) {
         new WebDriverWait(driver, 30).until((ExpectedCondition<Boolean>) wd ->
@@ -76,13 +93,13 @@ public class main {
         driver.navigate().to("https://accounts.google.com/ServiceLogin?hl=en&sacu=1");
         waitForLoad(driver);
         Thread.sleep(2);
-        print(driver.getCurrentUrl());
         WebElement emailBox = driver.findElement(By.id("identifierId"));
         emailBox.sendKeys(email, Keys.ENTER);
         Thread.sleep(2000);
         WebElement passwordBox = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/content[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/input[1]"));
         passwordBox.sendKeys(password, Keys.ENTER);
 //        Thread.sleep(2000);
+
     }
     public static void print(String string){
         System.out.println(string);
@@ -140,13 +157,7 @@ public class main {
             }
         }
 
-        //Up to here. Just finished putting values into bestValueTrip
-        bestValueTrip.departureFlight.printStats();
-
-
-
-
-
+        bestValueTrip.printStats();
 
 
 
