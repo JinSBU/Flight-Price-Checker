@@ -6,7 +6,7 @@ Goal: To create a software program that will allow user to find the cheapest fli
       
 Roadmap for this project:
 
-  Completed: (As of 5/2/2018)
+  Completed: (As of 5/30/2018)
   
       - Decide on a website to get best prices for flights (Momondo since Google Flights API is shutting down).
       
@@ -16,6 +16,9 @@ Roadmap for this project:
       
       - Return "best" value flight given period of travel and airports.
       
+      - Be able to send large amounts of request to Momondo without being flagged.
+      
+      - Can search for cheapest flights given a month and duration of travel.
   
 On the way:
 
@@ -33,8 +36,8 @@ On the way:
       
       - Analyze data after a certain time frame to look for trends for pricing of tickets.
       
-      - Be able to send large amounts of request to Momondo without being flagged.
+      
       
 Working on:
 
-Found a fix to Momondo detecting headless ChromeDriver. Will work on getting cheapest price within a set amount of dates. (Cheapest 5 day trip between June 01, 2018 to July 01, 2018)  
+Making this application multi-threaded to improve runtime speed and efficiency.
