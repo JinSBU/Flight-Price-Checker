@@ -35,8 +35,8 @@ public class main {
         from = "NYC";
         to = "SFO";
         //Input email and password for gmail. Used to bypass captcha/bot check?
-        String email = "textacc133@gmail.com";
-        String password = "zxasqw123";
+        String email = "";
+        String password = "";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
 
