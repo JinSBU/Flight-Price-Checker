@@ -2,6 +2,7 @@ package flight;
 
 import java.time.YearMonth;
 import java.util.Collections;
+import java.util.stream.IntStream;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -34,8 +35,8 @@ public class main {
         from = "NYC";
         to = "SFO";
         //Input email and password for gmail. Used to bypass captcha/bot check?
-        String email = "";
-        String password = "";
+        String email = "textacc133@gmail.com";
+        String password = "zxasqw123";
         // date is in the form of DD-MM-YYYY
         String includeNearbyAirports = "true";
 
@@ -70,7 +71,9 @@ public class main {
         YearMonth yearMonthObj = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
         int numDaysInMonth = yearMonthObj.lengthOfMonth();
         for(int i = 1; i <= numDaysInMonth - durationOfTravel; i++){
-
+            IntStream.range(0,20).parallel().forEach(i->{
+                //use intstream to try to get multhreading
+            });
             String startTripDay = String.format("%02d", i);
             String endTripDay = String.format("%02d", i + durationOfTravel);
 
@@ -78,6 +81,7 @@ public class main {
             String returnDate = endTripDay + "-" + month + "-" + year;
             String url = ("https://www.momondo.com/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=" + from + "&SD0=" + to
                     + "&SDP0=" + departDate + "&SO1=" + to + "&SD1=" + from + "&SDP1=" + returnDate + "&AD=1&TK=ECO&DO=false&NA=" +includeNearbyAirports + "&currency=USD");
+            Thread.sleep(1000);
             driver.navigate().to(url);
             checkCaptcha();
             waitForJavascript(driver);
@@ -88,7 +92,7 @@ public class main {
     }
     public static void checkCaptcha(){
         if(driver.getPageSource().contains("Please confirm that you are a real momondo user")) {
-            driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/a[1]")).sendKeys(Keys.TAB, Keys.SPACE);
+            driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[1]/nav[1]/ul[1]/li[7]/div[1]/div[1]/div[1]/a[1]")).sendKeys(Keys.TAB, Keys.SPACE);
         }
         else
             print("No captcha");
@@ -105,7 +109,7 @@ public class main {
         WebElement emailBox = driver.findElement(By.id("identifierId"));
         emailBox.sendKeys(email, Keys.ENTER);
         Thread.sleep(2000);
-        WebElement passwordBox = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/content[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/input[1]"));
+        WebElement passwordBox = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/form[1]/content[1]/div[1]/div[1]/div[1]/div[1]/div[1]/input[1]"));
         passwordBox.sendKeys(password, Keys.ENTER);
 //        Thread.sleep(2000);
 
@@ -119,7 +123,7 @@ public class main {
     public static void waitForJavascript(WebDriver chrome) throws InterruptedException {
         print("Loading page...");
         WebDriverWait wait = new WebDriverWait(chrome, 70);
-        wait.until(ExpectedConditions.textToBePresentInElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]"), "Search complete"));
+        wait.until(ExpectedConditions.textToBePresentInElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]"), "Search complete"));
         // got it to allow javascript to run first.
 
     }
@@ -131,16 +135,15 @@ public class main {
         //First, need to create a flight instance for departure and one for return (Cheapest flight)
         Flight departureFlight = new Flight();
         Flight returnFlight = new Flight();
-        String cheapestPath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
-
+        String cheapestPath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
         insertStats(departureFlight, "1", cheapestPath);
         insertStats(returnFlight, "2", cheapestPath);
-        String pricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
+        String pricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
         String price = driver.findElement(By.xpath(pricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
         price = price.substring(0, price.indexOf("D") + 1);
         Trip cheapestTrip = new Trip(departureFlight, returnFlight, price, departDate, returnDate, url);
 
-        String bestPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[4]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/a[1]/div[1]/div[2]/span[1]";
+        String bestPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[4]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/a[1]/div[1]/div[2]/span[1]";
 
         String bestValuePrice = driver.findElement(By.xpath(bestPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
         bestValuePrice = bestValuePrice.substring(0, bestValuePrice.indexOf("D") + 1);
@@ -158,7 +161,7 @@ public class main {
                 bestValueTrip = cheapestTrip;
             }
             else {
-                String bestValuePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + index +
+                String bestValuePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + index +
                         "]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
                 insertStats(bestValueDepartureFlight, "1", bestValuePath);
                 insertStats(bestValueReturnFlight, "2", bestValuePath);
@@ -174,7 +177,7 @@ public class main {
     public static String getBestValuePriceIndex(String price){
         for(int i = 2; i < 19; i++){    //This loop only goes up to 18 because Momondo only displaces 18 results
             try {
-                String optionPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[3]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + Integer.toString(i) +
+                String optionPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + Integer.toString(i) +
                         "]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
                 String optionPrice = driver.findElement(By.xpath(optionPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
 
@@ -196,6 +199,7 @@ public class main {
         String departAirportInfoPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
         departureFlight.airline = driver.findElement(By.xpath(path.substring(0, path.length() - 6) + "/div[1]")).getAttribute("innerHTML").replace("<span>", " ").replace("</span>", " ");
         departureFlight.departureAirportCode = (driver.findElement(By.xpath(departAirportInfoPath))).getAttribute("innerHTML");
+
 
         spanIndex = "2";
         departAirportInfoPath = path + "/li[" + listIndex + "]/div[1]/div[1]/div[2]/span[" + spanIndex +"]";
