@@ -1,20 +1,17 @@
 package flight;
 
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+;
 import java.util.stream.IntStream;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 
 /**
@@ -150,8 +147,6 @@ public class main {
         catch(Exception e){
             print("Could not complete search");
         }
-        // got it to allow javascript to run first.
-
     }
 
     /**
@@ -161,102 +156,46 @@ public class main {
         //First, need to create a flight instance for departure and one for return (Cheapest flight)
         Flight departureFlight = new Flight();
         Flight returnFlight = new Flight();
-        List<WebElement> flightInfo = driver.findElements(By.className("mainInfo"));
+        WebElement cheapestFlight = driver.findElement(By.className("mainInfo"));
 
-        List<WebElement> prices = driver.findElements(By.className("option-text"));
-        ArrayList<WebElement> removeList = new ArrayList<WebElement>();
-        for(WebElement x : prices){
-
-            if(!x.getText().contains("USD")){
-                removeList.add(x);
-            }
-        }
-        for(WebElement x : removeList){
-            prices.remove(x);
-        }
-        // All prices should now match the index of their corresponding Trip Element
-
-//        for(int i = 0; i < flightInfo.size(); i++){
-        WebElement cheapestFlight = flightInfo.get(0);
+//        WebElement cheapestFlight = flightInfo.get(0);
 
 //          element.getText() returns details about a trip
         String tripInfo = cheapestFlight.getText();
-
+        boolean newWebpage = false;
         String[] info = tripInfo.split("\n");
-        String[] departInfo = Arrays.copyOfRange(info, 0, 7);
-        String[] returnInfo = Arrays.copyOfRange(info, 7, 13);
-        insertStats(departureFlight, departInfo);
-        insertStats(returnFlight, returnInfo);
-        String price = prices.get(0).getText();
-        Trip cheapestTrip = new Trip(departureFlight, returnFlight, price, departDate, returnDate, url);
-
-
-
-        // NEED TO UPDATE THIS PATH AND ALL CODE RELATING TO IT
-
-        String bestPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[4]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/a[1]/div[1]/div[2]/span[1]";
-
-        String bestValuePrice = driver.findElement(By.xpath(bestPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
-        bestValuePrice = bestValuePrice.substring(0, bestValuePrice.indexOf("D") + 1);
-
-        Flight bestValueDepartureFlight = new Flight();
-        Flight bestValueReturnFlight = new Flight();
-        Trip bestValueTrip;
-        if(bestValuePrice.equals(price)){
-            bestValueTrip = cheapestTrip;
+        if(info.length == 10){
+            newWebpage = true;
         }
-        else{
-            String index = getBestValuePriceIndex(driver, bestValuePrice);
-//            print(index);
-            if(index == null){
-                bestValueTrip = cheapestTrip;
-            }
-            else {
-                String bestValuePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + index +
-                        "]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/ol[1]";
-//                insertStats(driver, bestValueDepartureFlight, "1", bestValuePath);
-//                insertStats(driver, bestValueReturnFlight, "2", bestValuePath);
-                bestValueTrip = new Trip(bestValueDepartureFlight, bestValueReturnFlight, bestValuePrice, departDate, returnDate, url);
-            }
-        }
+//        for(String x : info){
+//            print(x);
+//        }
+        WebElement price = driver.findElement(By.className("option-text"));
 
-        bestValueTrip.printStats();
+        // All prices should now match the index of their corresponding Trip Element
 
-
-
-    }
-    public static String getBestValuePriceIndex(WebDriver driver, String price){
-        for(int i = 2; i < 19; i++){    //This loop only goes up to 18 because Momondo only displaces 18 results
-            try {
-                String optionPricePath = "/html[1]/body[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[2]/div[6]/div[2]/div[1]/div[1]/div[" + Integer.toString(i) +
-                        "]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/a[1]/span[1]";
-                String optionPrice = driver.findElement(By.xpath(optionPricePath)).getAttribute("innerHTML").replace("&nbsp;", " ");
-
-                optionPrice = optionPrice.substring(0, optionPrice.indexOf("D") + 1).replace("\n", "");
-                if (optionPrice.equals(price)) {
-                    return Integer.toString(i);
-                }
-            }
-            catch(Exception e){
-                //Only have this here because Momondo skips some indices for some reason
-            }
-        }
-        return null;
-
-
-    }
-    public static void insertStats(Flight flight, String[] info) {
         String airline = info[0];
-        String[] departInfo = info[1].split(" ", 2);
-        String departAirportCode = departInfo[0];
-        String departTime = departInfo[1];
-        String departLocation = info[2];
-        String departDuration = info[3];
-        String layover = info[4];
-        String[] arrivalInfo = info[5].split(" ", 2);
-        String arrivalTime = arrivalInfo[0];
-        String arrivalAirportCOde = arrivalInfo[1];
-        String arrivalLocation = info[6];
+        String[] departInfo = Arrays.copyOfRange(info, 1, 7);
+        String[] returnInfo = Arrays.copyOfRange(info, 7, 13);
+        insertStats(departureFlight, departInfo, airline);
+        insertStats(returnFlight, returnInfo, airline);
+        String priceText = price.getText();
+        Trip cheapestTrip = new Trip(departureFlight, returnFlight, priceText, departDate, returnDate, url);
+    }
+
+    public static void insertStats(Flight flight, String[] info, String airline) {
+        for(String x: info){
+            print(x);
+        }
+        String departAirportCode = info[0].substring(0,3);
+        String departTime = info[0].substring(4);
+        String departLocation = info[1];
+        String departDuration = info[2];
+        String layover = info[3];
+
+        String arrivalTime = info[4].substring(4);
+        String arrivalAirportCode = info[4].substring(0, 3);
+        String arrivalLocation = info[5];
 
         flight.airline = airline;
         flight.departureAirportCode = departAirportCode;
@@ -273,10 +212,7 @@ public class main {
         flight.totalTravelTime = departDuration;
         flight.arrivalTime = arrivalTime;
 
-        flight.arrivalAirportCode = arrivalAirportCOde;
+        flight.arrivalAirportCode = arrivalAirportCode;
         flight.arrivalAirport = arrivalLocation;
     }
-
-
-
 }
