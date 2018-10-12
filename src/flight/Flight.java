@@ -7,13 +7,12 @@ package flight;
 public class Flight {
     String airline;
     String departureAirportCode, arrivalAirportCode;
-    String departureAirport, arrivalAirport;
     String departureTime, arrivalTime;
     boolean layover = false;
     String totalTravelTime;
 
     public void printStats(){
-        System.out.println(airline + " " + departureAirportCode + " " + departureAirport + " " + departureTime +
-                "\n" + arrivalAirportCode + " " + arrivalAirportCode + " " + arrivalAirport + " " + arrivalTime + "\n" + totalTravelTime);
+        System.out.println("Airline: " + airline + " \nDeparture Airport Code: " + departureAirportCode + " \nDeparture Time: " + departureTime +
+                "\nAirport Arrival Code: " + arrivalAirportCode + " \nAirport Arrival TIme: " + arrivalTime + "\nTotal Travel TIme: " + totalTravelTime + "\nLayover: " + layover);
     }
 }

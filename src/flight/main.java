@@ -1,9 +1,11 @@
 package flight;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 ;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.openqa.selenium.*;
@@ -27,14 +29,16 @@ public class main {
     static String from;
     static String to;
     static String includeNearbyAirports;
+    static ArrayList<Trip> trips;
     public static void main(String[] args)throws InterruptedException{
-//        String departDate = "26-06-2018";
-//        String returnDate = "06-07-2018";
-        String month = "11";
-        String year = "2018";
+        String departDate = "26-06-2018";
+        String returnDate = "06-07-2018";
+        String month = "01";
+        String year = "2019";
         int durationOfTravel = 7;
         from = "NYC";
         to = "SFO";
+        trips = new ArrayList<>();
         //Input email and password for gmail. Used to bypass captcha/bot check?
 
         // date is in the form of DD-MM-YYYY
@@ -45,8 +49,8 @@ public class main {
         options.setExperimentalOption("useAutomationExtension", false);
         options.setExperimentalOption("excludeSwitches",Collections.singletonList("enable-automation"));
 
-//        options.addArguments("headless");
-        options.addArguments("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36");
+        options.addArguments("headless");
+        options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
 
 
         System.setProperty("webdriver.chrome.driver", "C:/Users/jinth/IdeaProjects/Flight-Price-Checker/chromedriver.exe");
@@ -57,6 +61,8 @@ public class main {
             can store into a DB and compare everyday to see if prices are steals or have lowered        *this could be a separate project*
             can have GUI and show lowest price in a month. THIS IS WHAT WILL BE WORKED ON
         */
+
+
         generateResultsForMonth(month, year, durationOfTravel);
 
 
@@ -65,12 +71,12 @@ public class main {
     public static void generateResultsForMonth(String month, String year, int durationOfTravel) throws InterruptedException {
 
         YearMonth yearMonthObj = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
-        String email = "133@gmail.com";
-        String password = "";
+        String email = "textacc133@gmail.com";
+        String password = "zxasqw123";
         int numDaysInMonth = yearMonthObj.lengthOfMonth();
 
         // change 2 to numDaysInMonth - durationOfTravel
-        IntStream.range(1,2).parallel().forEach(i->{
+        IntStream.range(1,numDaysInMonth - durationOfTravel).parallel().forEach(i->{
             WebDriver driver;
             driver = new ChromeDriver(options);
 
@@ -119,10 +125,10 @@ public class main {
     public static void loginGoogle(WebDriver driver, String email, String password) throws InterruptedException {
         driver.navigate().to("https://accounts.google.com/ServiceLogin?hl=en&sacu=1");
         waitForLoad(driver);
-        Thread.sleep(2000);
+        Thread.sleep(1500);
         WebElement emailBox = driver.findElement(By.id("identifierId"));
         emailBox.sendKeys(email, Keys.ENTER);
-        Thread.sleep(2000);
+        Thread.sleep(1500);
         WebElement passwordBox = driver.findElement(By.name("password"));
         passwordBox.sendKeys(password, Keys.ENTER);
 //        Thread.sleep(2000);
@@ -146,6 +152,7 @@ public class main {
         }
         catch(Exception e){
             print("Could not complete search");
+
         }
     }
 
@@ -160,51 +167,47 @@ public class main {
 
 //        WebElement cheapestFlight = flightInfo.get(0);
 
-//          element.getText() returns details about a trip
         String tripInfo = cheapestFlight.getText();
         boolean newWebpage = false;
-        String[] info = tripInfo.split("\n");
-        if(info.length == 10){
-            newWebpage = true;
+        List<String> list = new ArrayList<String>(Arrays.asList(tripInfo.split("\n")));
+//        String[] info = tripInfo.split("\n");
+        while(list.contains("+1")){
+            list.remove("+1");
         }
-//        for(String x : info){
-//            print(x);
-//        }
         WebElement price = driver.findElement(By.className("option-text"));
 
         // All prices should now match the index of their corresponding Trip Element
-
-        String airline = info[0];
-        String[] departInfo = Arrays.copyOfRange(info, 1, 7);
-        String[] returnInfo = Arrays.copyOfRange(info, 7, 13);
+        String airline = list.get(1);
+        ArrayList<String> departInfo = new ArrayList<String>(list.subList(0, 5));
+        ArrayList<String> returnInfo = new ArrayList<String>(list.subList(5, 10));
         insertStats(departureFlight, departInfo, airline);
         insertStats(returnFlight, returnInfo, airline);
         String priceText = price.getText();
         Trip cheapestTrip = new Trip(departureFlight, returnFlight, priceText, departDate, returnDate, url);
+        cheapestTrip.printStats();
+        trips.add(cheapestTrip);
+        driver.close();
     }
 
-    public static void insertStats(Flight flight, String[] info, String airline) {
-        for(String x: info){
-            print(x);
-        }
-        String departAirportCode = info[0].substring(0,3);
-        String departTime = info[0].substring(4);
-        String departLocation = info[1];
-        String departDuration = info[2];
-        String layover = info[3];
+    public static void insertStats(Flight flight, ArrayList<String> info, String airline) {
 
-        String arrivalTime = info[4].substring(4);
-        String arrivalAirportCode = info[4].substring(0, 3);
-        String arrivalLocation = info[5];
+        String departAirportCode = info.get(4).substring(0,3);
+        String[] timeSplit = info.get(0).split(" ");
+
+        String departTime = timeSplit[0] + " " + timeSplit[1];
+        String departDuration = info.get(3);
+        String layover = info.get(2);
+
+        String arrivalTime = timeSplit[3] + " " + timeSplit[4];
+        String arrivalAirportCode = info.get(4).substring(info.get(4).length() - 3);
 
         flight.airline = airline;
         flight.departureAirportCode = departAirportCode;
         flight.departureTime = departTime;
 
-        flight.departureAirport = departLocation;
 
 
-        if(layover.equals("Nonstop")){
+        if(layover.equals("nonstop")){
             flight.layover = false;
         }
         else flight.layover = true;
@@ -213,6 +216,16 @@ public class main {
         flight.arrivalTime = arrivalTime;
 
         flight.arrivalAirportCode = arrivalAirportCode;
-        flight.arrivalAirport = arrivalLocation;
+    }
+    public static void getCheapestTrip(){
+        int minPrice = 9999;
+        Trip cheapestTrip = null;
+        for(Trip trip : trips ){
+            if(trip.getPrice() < minPrice) {
+                cheapestTrip = trip;
+                minPrice = trip.getPrice();
+            }
+        }
+        print(cheapestTrip.toString());
     }
 }

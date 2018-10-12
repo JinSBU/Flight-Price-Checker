@@ -17,7 +17,8 @@ public class Trip {
         departureFlight.printStats();
         returnFlight.printStats();
         System.out.println(price+ "\nDepart Date: " + departDate  + "\nReturn Date: " + returnDate + "\n" + url + "\n");
-
-
+    }
+    public static int getPrice(){
+        return Integer.parseInt(price);
     }
 }
